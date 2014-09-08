@@ -1,0 +1,19 @@
+#
+# This file contains the process information with the following format
+#
+# quantum_length
+#
+# process_id   arrival_time   cpu_burst   priority
+# process_id   arrival_time   cpu_burst   priority
+# ...
+# process_id   arrival_time   cpu_burst   priority
+#
+# This is the solution for the first partial exam of 2013
+# 3
+# Part (h) requires a different quantum q = 5
+5
+1 0 8 3
+2 2 4 0
+3 5 6 2
+4 6 2 1
+5 7 7 3
