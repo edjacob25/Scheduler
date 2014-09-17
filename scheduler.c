@@ -43,6 +43,7 @@
  * $Id$
  */
 
+#include <glib.h>
 #include <stdlib.h>                     /* Used for malloc definition */
 #include <stdio.h>                                /* Used for fprintf */
 #include <string.h>                                /* Used for strcmp */
@@ -108,7 +109,7 @@ int main (int argc, const char * argv[]) {
         }
         
         /* Start by sorting the processes by arrival time */
-        processList_p = SortProcessList(processList_p, ARRIVALTIME);
+        processList_p = SortProcessList(processList_p, "ARRIVALTIME");
         
 #ifdef DEBUG
         /* Now print each element in the list */
@@ -120,16 +121,16 @@ int main (int argc, const char * argv[]) {
          */
         FirstCome (processList_p);
         
-        NonPreemptive(processList_p, PRIORITY);
+        NonPreemptive(processList_p, "PRIORITY");
         
-        NonPreemptive(processList_p, CPUBURST);
+        NonPreemptive(processList_p, "CPUBURST");
         
-        Preemptive(processList_p, PRIORITY);
+        Preemptive(processList_p, "PRIORITY");
         
-        Preemptive(processList_p, CPUBURST);
+        Preemptive(processList_p, "CPUBURST");
         
-        RoundRobin(processList_p, quantum);
-
+        RoundRobin(processList_p, "quantum");
+        
         /* Deallocate the memory assigned to the list */
         DestroyList(processList_p);
         
