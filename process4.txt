@@ -12,8 +12,8 @@
 # 3
 # Part (h) requires a different quantum q = 5
 5
+3 5 6 2
 1 0 8 3
 2 2 4 0
-3 5 6 2
-4 6 2 1
 5 7 7 3
+4 6 2 1
