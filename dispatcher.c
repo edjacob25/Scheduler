@@ -32,7 +32,7 @@
  */
 
 #include <glib.h>				          /* For use linked lists in Glist 	*/
-#include <stdio.h>					        	         /* For use Printf 	*/
+#include <stdio.h>					        	         /* For use printf 	*/
 #include "FileIO.h"					    	         /* For error handling  */
 #include "dispatcher.h"	   /* Definitions of functions and data structures	*/
 
@@ -48,21 +48,44 @@ GList * CreateProcess(GList *processList, int process_id, int arrival_time, int 
 	return processList;
 }
 
-GList * SortProcessList(GList *processList, char * param) {
+GList * SortProcessList(GList *processList, enum OPTION param) {
 	GList *orderedList = NULL, *i, *j;
 	process *temp, *temp2;
 	int elements = 0;
 
 	for (i = processList; i != NULL; i = i->next) { // Iterates over the linked list
 		temp = i->data;
-		int firstArrival = temp->arrival_time;
+		//Choses the criteria to sort 
+		int criteria;
+		if (param == 0 ) {
+			criteria = temp->arrival_time;
+		}
+		else if (param == 1) {
+			criteria = temp->cpu_burst;
+		}
+		else if (param == 2) {
+			criteria = temp->priority;
+		}
+
+
 		int added = 0;
 		if (elements>0)	{ // Is there a element in the new list yet?
 
 			for (j = orderedList; j != NULL; j = j->next) { // Iterate the ordered list
 				temp2 = j->data;
-				if ((firstArrival < temp2->arrival_time) && (added == 0)) { 
-					// If your arrival time is smaller than the next one, you found your place 
+				int comparison;
+				if (param == 0 ) {
+					comparison = temp2->arrival_time;
+				}
+				else if (param == 1) {
+					comparison = temp2->cpu_burst;
+				}
+				else if (param == 2) {
+					comparison = temp2->priority;
+				}
+
+				if ((criteria < comparison) && (added == 0)) { 
+					// If your parameter is smaller than the next one, you found your place 
 					orderedList = g_list_insert_before(orderedList, j, temp);
 					added = 1;
 				}
@@ -80,8 +103,11 @@ GList * SortProcessList(GList *processList, char * param) {
 	}
 
 	#ifdef DEBUG
+		printf("Unordered list\n");
 		PrintProcessList(processList);
+		printf("\nordered list\n");
 		PrintProcessList(orderedList);
+		printf("\n");
 	#endif
 
 	//g_list_free_full(processList);
@@ -101,17 +127,72 @@ void PrintProcessList(GList *processList) {
 }
 
 void DestroyList(GList *processList) {
-
+	g_list_free(processList);
 }
+
 void FirstCome (GList *processList) {
+	GList *i;
+	process *temp;
+	int acumulatedTime = 0;
+	float full = 0;
+	float numberProcess = 0;
+	float average;
+	for (i = processList; i != NULL; i=i->next)	{
+		temp = i->data;
+		temp->last_runned = acumulatedTime;
+		acumulatedTime = acumulatedTime + temp->cpu_burst;
+		full = full + (temp->last_runned - temp->arrival_time);
+		numberProcess++;
+	}
+	average = full/numberProcess;
 
+	printf("FirstCome\n");
+	printf("Average time = %2f\n",average);
+	#ifdef DEBUG
+		printf("%f %f\n",full,numberProcess);
+	#endif
 }
-void NonPreemptive(GList *processList,  char * param) {
+
+void NonPreemptive(GList *processList,  enum OPTION param) {
+	int acumulatedTime = 0;
+	float full = 0;
+	float numberProcess = 0;
+	float average;
+	process *temp;
+	GList *i = g_list_copy(processList);
 	
+	//First member;
+	temp = i->data;
+	acumulatedTime = temp->arrival_time;
+	temp->last_runned = acumulatedTime;
+	acumulatedTime = acumulatedTime + temp->cpu_burst;
+	full = full + (temp->last_runned - temp->arrival_time);
+	numberProcess++;
+	i = g_list_delete_link(i, i);
+	
+	i = SortProcessList(i, param);
+	// Rest of the elements
+	for (i = i; i != NULL; i=i->next)	{
+		temp = i->data;
+		temp->last_runned = acumulatedTime;
+		acumulatedTime = acumulatedTime + temp->cpu_burst;
+		full = full + (temp->last_runned - temp->arrival_time);
+		numberProcess++;
+	}
+
+	average = full/numberProcess;
+	g_list_free(i);
+	printf("Non Preemptive %d\n", param);
+	printf("Average time = %2f\n",average);
+	#ifdef DEBUG
+		printf("%f %f\n",full,numberProcess);
+	#endif
 }
-void Preemptive(GList *processList,  char * param) {
+
+void Preemptive(GList *processList,  enum OPTION param) {
 
 }
-void RoundRobin(GList *processList,  char * param){
 
+void RoundRobin(GList *processList, int quantum){
+	GList *i, *j;
 }
