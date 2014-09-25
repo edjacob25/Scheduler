@@ -43,6 +43,7 @@ GList * CreateProcess(GList *processList, int process_id, int arrival_time, int 
 	temp->arrival_time = arrival_time;
 	temp->cpu_burst = cpu_burst;
 	temp->priority = priority;
+	temp->timeleft = cpu_burst;
 
 	processList = g_list_prepend(processList, temp);
 	return processList;
@@ -110,7 +111,7 @@ GList * SortProcessList(GList *processList, enum OPTION param) {
 		printf("\n");
 	#endif
 
-	//g_list_free_full(processList);
+	//g_list_free_timeSummation(processList);
 	return orderedList;
 }
 
@@ -134,28 +135,28 @@ void FirstCome (GList *processList) {
 	GList *i;
 	process *temp;
 	int acumulatedTime = 0;
-	float full = 0;
+	float timeSummation = 0;
 	float numberProcess = 0;
 	float average;
 	for (i = processList; i != NULL; i=i->next)	{
 		temp = i->data;
 		temp->last_runned = acumulatedTime;
 		acumulatedTime = acumulatedTime + temp->cpu_burst;
-		full = full + (temp->last_runned - temp->arrival_time);
+		timeSummation = timeSummation + (temp->last_runned - temp->arrival_time);
 		numberProcess++;
 	}
-	average = full/numberProcess;
+	average = timeSummation/numberProcess;
 
 	printf("FirstCome\n");
 	printf("Average time = %2f\n",average);
 	#ifdef DEBUG
-		printf("%f %f\n",full,numberProcess);
+		printf("%f %f\n",timeSummation,numberProcess);
 	#endif
 }
 
 void NonPreemptive(GList *processList,  enum OPTION param) {
 	int acumulatedTime = 0;
-	float full = 0;
+	float timeSummation = 0;
 	float numberProcess = 0;
 	float average;
 	process *temp;
@@ -166,7 +167,7 @@ void NonPreemptive(GList *processList,  enum OPTION param) {
 	acumulatedTime = temp->arrival_time;
 	temp->last_runned = acumulatedTime;
 	acumulatedTime = acumulatedTime + temp->cpu_burst;
-	full = full + (temp->last_runned - temp->arrival_time);
+	timeSummation = timeSummation + (temp->last_runned - temp->arrival_time);
 	numberProcess++;
 	i = g_list_delete_link(i, i);
 	
@@ -176,16 +177,16 @@ void NonPreemptive(GList *processList,  enum OPTION param) {
 		temp = i->data;
 		temp->last_runned = acumulatedTime;
 		acumulatedTime = acumulatedTime + temp->cpu_burst;
-		full = full + (temp->last_runned - temp->arrival_time);
+		timeSummation = timeSummation + (temp->last_runned - temp->arrival_time);
 		numberProcess++;
 	}
 
-	average = full/numberProcess;
+	average = timeSummation/numberProcess;
 	g_list_free(i);
 	printf("Non Preemptive %d\n", param);
 	printf("Average time = %2f\n",average);
 	#ifdef DEBUG
-		printf("%f %f\n",full,numberProcess);
+		printf("%f %f\n",timeSummation,numberProcess);
 	#endif
 }
 
@@ -194,5 +195,46 @@ void Preemptive(GList *processList,  enum OPTION param) {
 }
 
 void RoundRobin(GList *processList, int quantum){
-	GList *i, *j;
+	int acumulatedTime = 0;
+	float timeSummation = 0;
+	float numberProcess = 0;
+	float average;
+	GList *list = g_list_copy(processList),*i;
+	process *temp = list->data;
+	acumulatedTime = temp->arrival_time;
+	for (i= list; i != NULL; i=i->next) {
+		temp = i->data;
+		if (temp->timeleft > 0){
+			if (temp->timeleft > quantum) {
+				temp->timeleft = temp->timeleft - quantum;
+				acumulatedTime = acumulatedTime + quantum;
+				i = g_list_append(i, temp);
+			}
+			else {
+				temp->last_runned = acumulatedTime;
+				timeSummation = timeSummation + (temp->last_runned - temp->arrival_time  - (temp->cpu_burst - temp->timeleft));
+				#ifdef DEBUG
+					PrintProcess(temp);
+				#endif
+				acumulatedTime = acumulatedTime + temp->timeleft;
+				temp->timeleft = 0;
+				numberProcess++;
+			}
+		}
+	}
+	average = timeSummation/numberProcess;
+	g_list_free(i);
+	printf("Round Robin\n");
+	printf("Average time = %2f\n",average);
+	#ifdef DEBUG
+		printf("%f %f\n",timeSummation,numberProcess);
+	#endif
+}
+
+void PrintProcess(process *proc) {
+	printf("Process %d\n",proc->id);
+	printf("Last Runned: %d    ",proc->last_runned);
+	printf("Arrival: %d    ",proc->arrival_time);
+	printf("Burst: %d    ",proc->cpu_burst);
+	printf("Left: %d    \n",proc->timeleft);
 }

@@ -70,3 +70,4 @@ void FirstCome (GList *processList);
 void NonPreemptive(GList *processList,  enum OPTION param);
 void Preemptive(GList *processList,  enum OPTION param);
 void RoundRobin(GList *processList,  int quantum);
+void PrintProcess(process *proc);
