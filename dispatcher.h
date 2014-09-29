@@ -15,7 +15,10 @@
  *
  * Restrictions:
  *          The process need 4 parameters to be created: id, arrival
- *			time, cpu burst and priority 
+ *			time, cpu burst and priority.
+ *			The methods shall be provided with an ordered list by
+ *			arrival time to work properly. This can be achieved by 
+ *			calling the function SortProcessList of this file
  *
  * Revision history:
  *
@@ -24,15 +27,25 @@
  *          September 21 2014 - Added definition for add, print
  *								and order processes
  *
+ *			September 22 2014 - Implemented FCFS and Non Preeemptive
+ *
+ *			September 29 2014 - Round Robin algorithm implemented
+ *
+ *			September 29 2014 - Preemptive algorithm implemented and
+ *								fixed Round Robin bug
+ *
  * Error handling:
  *          None
  *
  * Notes:
- *          Stiil incomplete
+ *          Many methods may require refactoring, specially Preemptive
+ *			and Round Robin. Also it does not handle voids in the arrival
+ * 			time 
  *
- * 
+ * Repository;
+ *			https://github.com/edjacob25/Scheduler
+ *
  */
-
 
 #include <glib.h> //To use the GList
 
@@ -53,7 +66,8 @@ enum OPTION
 {
 	ARRIVALTIME,
 	CPUBURST,
-	PRIORITY
+	PRIORITY,
+	TIMELEFT
 };
 
 typedef struct node process;
@@ -70,4 +84,5 @@ void FirstCome (GList *processList);
 void NonPreemptive(GList *processList,  enum OPTION param);
 void Preemptive(GList *processList,  enum OPTION param);
 void RoundRobin(GList *processList,  int quantum);
-void PrintProcess(process *proc);
+void PrintProcess(process *proc, int acumulatedTime);
+void InitializeList(GList *processList);
