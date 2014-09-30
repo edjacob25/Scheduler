@@ -378,7 +378,7 @@ void Preemptive(GList *processList,  enum OPTION param) {
 		}
 		i = i->next; // Go to the next process in the list
 
-	}while(i!=NULL); // Do it until the list is finished
+	}while(i!=NULL || arr!= NULL); // Do it until the list is finished
 	
 	average = timeSummation/numberProcess;  // Calculate the average
 	g_list_free(arr); // Destroy the copy of the original list
